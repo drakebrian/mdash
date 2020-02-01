@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section>
+	<h1>Local Network</h1>
+	<div class="container">
+		{% for atv in context.atvs %}
+		<div class="media">
+			<h2>{{ atv.name }}</h2>
+			<h3>{{ atv.address }}</h3>
+
+			{{ atv.playing }}
+		</div>
+		{% endfor %}
+	</div>
+</section>
+{% endblock %}
