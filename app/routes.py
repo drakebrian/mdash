@@ -15,16 +15,33 @@ async def discover(loop):
     atvs = []
 
     for device in discovered:
-        #try:
-            #connect_device = await pyatv.connect(device, loop)
         atv = {}
+        atv['playing'] = False
+
         atv['name'] = device.name
         atv['address'] = device.address
-        atv['playing'] = 'Nothing Playing' #await connect_device.metadata.playing()
+        atv['identifier'] = device.identifier
+        atv['services'] = device.services
+
+        for service in device.services:
+            if service.protocol.name == 'MRP':
+                try:
+                    connect_device = await pyatv.connect(device, loop)
+                    now_playing = await connect_device.metadata.playing()
+                    # 'album', 'artist', 'device_state', 'genre', 'hash', 'media_type', 'position', 'repeat', 'shuffle', 'title', 'total_time'
+                    if 'playing' in str(now_playing.device_state).lower():
+                        atv['now_playing'] = now_playing.title
+                        atv['playing'] = True
+
+                        if now_playing.total_time:
+                            atv['playing_percent'] = (now_playing.position / now_playing.total_time) * 100
+                        elif now_playing.position and not now_playing.total_time:
+                            atv['playing_percent'] = 200
+
+                finally:
+                    await connect_device.close()
 
         atvs.append(atv)
-        #finally:
-        #    connect_device.close()
 
     return atvs
 

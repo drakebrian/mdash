@@ -5,11 +5,25 @@
 	<h1>Local Network</h1>
 	<div class="container">
 		{% for atv in context.atvs %}
-		<div class="media">
+		<div class="media" {% if atv.identifier %}id="{{ atv.identifier }}"{% endif %}>
 			<h2>{{ atv.name }}</h2>
 			<h3>{{ atv.address }}</h3>
 
-			{{ atv.playing }}
+			{% if atv.playing %}
+				<marquee scrolldelay="100"><span class="playing">{{ atv.now_playing }}</span></marquee>
+			{% else %}
+				<span class="idle">Not Playing</span>
+			{% endif %}
+
+			<div class="progress">
+				{% if atv.playing_percent %}
+					{% if atv.playing_percent > 100 %}
+						<div class="bar" style="width: 100%"></div>
+					{% elif atv.playing_percent > 0 %}
+						<div class="bar" style="width: {{ atv.playing_percent }}%"></div>
+					{% endif %}
+				{% endif %}
+			</div>
 		</div>
 		{% endfor %}
 	</div>

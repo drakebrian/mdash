@@ -36,3 +36,26 @@ section h1 {
   color: #bbb;
   margin: 5px 0;
 }
+
+.media span {
+  font-size: 18px;
+  margin: 5px 0;
+}
+.media span.idle {
+  color: #bbb;
+}
+
+.progress {
+  width: 100%; height: 3px;
+  background: #111;
+  display: block;
+  margin: 25px 0 10px 0;
+  position: relative;
+}
+.bar {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  display: block;
+  height: 3px;
+  width: 0;
+  background: steelblue;
+}
