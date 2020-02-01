@@ -1,40 +1,39 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
-
 html, body {font-family: 'Open Sans', sans-serif;}
-
 body {
-  margin: 25px 40px;
+  margin: 25px 2.25vw;
+  background: #111;
 }
 
 section h1 {
   font-size: 30px;
-  margin: 15px 0;
+  margin: 15px 0 25px 0;
+  color: #ccc;
 }
 
 .container {
   display: grid;
-  grid-template-columns: 400px 400px 400px;
-  grid-gap: 20px;
-  background-color: #fff;
+  grid-template-columns: 30.25vw 30.25vw 30.25vw;
+  grid-gap: 2.25vw;
   color: #444;
-}
 
+}
 .media {
-  background-color: #444;
+  background-color: #333;
   color: #fff;
-  border-radius: 5px;
   padding: 20px;
   font-size: 150%;
+  position: relative;
 }
 
 .media h2 {
   font-size: 24px;
-  margin: 5px 0;
+  margin: 5px 0 10px 0;
 }
 .media h3 {
   font-size: 18px;
-  color: #bbb;
-  margin: 5px 0;
+  color: #999;
+  margin: 5px 0 25px 0;
 }
 
 .media span {
@@ -43,6 +42,22 @@ section h1 {
 }
 .media span.idle {
   color: #bbb;
+}
+
+.status {
+  position: absolute;
+  top: 30px; right: 20px;
+  height: 24px; width: 24px;
+  background: transparent;
+}
+.status.playing {
+  border-left: 20px solid #fff;
+  border-top: 10px solid transparent; border-bottom: 10px solid transparent;
+  height: 1px; width: 1px;
+}
+.status.paused {
+  border-left: 24px double #fff;
+  width: 1px;
 }
 
 .progress {
@@ -59,3 +74,10 @@ section h1 {
   width: 0;
   background: steelblue;
 }
+
+.times {
+  height: 20px; width: 100%;
+}
+
+.times span {float: left;}
+.times span:nth-child(2) {float: right;}

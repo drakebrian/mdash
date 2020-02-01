@@ -10,8 +10,15 @@
 			<h3>{{ atv.address }}</h3>
 
 			{% if atv.playing %}
+				{% if atv.playing == 'Paused' %}
+					<div class="status paused"></div>
+				{% else %}
+					<div class="status playing"></div>
+				{% endif %}
+
 				<marquee scrolldelay="100"><span class="playing">{{ atv.now_playing }}</span></marquee>
 			{% else %}
+				<div class="status idle"></div>
 				<span class="idle">Not Playing</span>
 			{% endif %}
 
@@ -24,6 +31,14 @@
 					{% endif %}
 				{% endif %}
 			</div>
+
+			<div class="times">
+				{% if atv.current_position %}
+					<span>{{ atv.current_position }}</span>
+					<span>{{ atv.time_remaining }}</span>
+				{% endif %}
+			</div>
+
 		</div>
 		{% endfor %}
 	</div>
