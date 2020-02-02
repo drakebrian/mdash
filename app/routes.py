@@ -1,7 +1,9 @@
 from app import app
+from plexapi.server import PlexServer
 from quart import Quart, render_template
 import asyncio
 import datetime
+import json
 import nest_asyncio
 import os.path
 import pyatv
@@ -43,7 +45,7 @@ async def discover(loop, artwork=False, hosts=None):
         atv['name'] = device.name
         atv['address'] = device.address
         atv['identifier'] = device.identifier
-        atv['services'] = device.services
+        # atv['services'] = device.services
 
         for service in device.services:
             if service.protocol.name == 'MRP':
@@ -61,8 +63,12 @@ async def discover(loop, artwork=False, hosts=None):
                         if now_playing.total_time:
                             atv['playing_percent'] = (now_playing.position / now_playing.total_time) * 100
 
-                            atv['current_position'] = str(now_playing.position / 60).split('.')[0] + ':' + str(now_playing.position % 60).zfill(2)
-                            atv['time_remaining'] = str((now_playing.total_time - now_playing.position) / 60).split('.')[0] + ':' + str((now_playing.total_time - now_playing.position) % 60).zfill(2)
+                            atv['current_position'] = now_playing.position
+                            atv['time_remaining'] = now_playing.total_time - now_playing.position
+                        
+                            print('current: ' + str(now_playing.position))
+                            print('total: ' + str(now_playing.total_time))
+                            print(str(atv['playing_percent']))
                         elif now_playing.position and not now_playing.total_time:
                             atv['playing_percent'] = 200
 
@@ -73,16 +79,59 @@ async def discover(loop, artwork=False, hosts=None):
 
                 finally:
                     await connect_device.close()
-
         atvs.append(atv)
 
     return atvs
 
+def plex_connect(plex_config):
+    addr = plex_config['addr']
+    port = plex_config['port']
+    protocol = plex_config['protocol']
+    token = plex_config['token']
+    base_url = protocol + '://' + addr + ':' + str(port)
+    plex = PlexServer(base_url, token)
+
+    return plex
+
+def plex_load_config(config=CONFIG_FILE):
+    plex_config = load_config(config=CONFIG_FILE, section='plex_server')
+
+    return plex_config
+
 @app.route('/')
 def dashboard():
+    local_plex_sessions = []
+    remote_plex_sessions = []
+    plex = plex_connect(plex_load_config())
+
+    for session in plex.sessions():
+        title = session.title
+        for player in session.players:
+            session = {}
+            session['name'] = player.title + ' (' + player.device + ')'
+            session['identifier'] = player.machineIdentifier
+            session['now_playing'] = title
+            session['address'] = player.address
+            session['playing'] = False
+
+            if player.local:
+                local_plex_sessions.append(session)
+            else:
+                remote_plex_sessions.append(session)
+
+            if player.state == 'playing':
+                session['playing'] = True
+            elif player.state == 'paused':
+                session['playing'] = 'Paused'
+
+
+
     hosts_preload = load_config(config=CONFIG_FILE, section='apple_tvs')
     atvs = LOOP.run_until_complete(discover(LOOP, hosts=hosts_preload))
     atvs = sorted(atvs, key = lambda i: i['name'])
 
-    context = {'atvs': atvs}
-    return render_template('dashboard.html', title='Mdashboard', context=context)
+    local = atvs + local_plex_sessions
+    remote = remote_plex_sessions
+    context = {'local': local, 'remote': remote}
+
+    return render_template('dashboard.html', title='Mdashboard', context=context, console=json.dumps(context))

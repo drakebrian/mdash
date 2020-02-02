@@ -1,7 +1,10 @@
-# MDash
-### Live media dashboard for home streaming devices
+# Mdash
+Live media dashboard for home streaming devices.
 
-Apple TV currently supported via pyatv.
+#### Currently Supported:
+* Apple TV via [pyatv](https://github.com/postlund/pyatv)
+* Plex media server via [PlexAPI](https://github.com/pkkid/python-plexapi)
 
-Work in progress. Next planned integration is Plex media server.
+
+A work in progress.
 

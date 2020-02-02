@@ -1,3 +1,8 @@
 apple_tvs:
   - 192.168.0.10
   - 192.168.0.20
+plex_server:
+  addr: 192.168.0.30
+  protocol: http
+  token: xxxxxxxxxxxxxxxxxxx
+  port: 32400

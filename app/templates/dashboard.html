@@ -4,19 +4,19 @@
 <section>
 	<h1>Local Network</h1>
 	<div class="container">
-		{% for atv in context.atvs %}
-		<div class="media" {% if atv.identifier %}id="{{ atv.identifier }}"{% endif %}>
-			<h2>{{ atv.name }}</h2>
-			<h3>{{ atv.address }}</h3>
+		{% for local in context.local %}
+		<div class="media" {% if local.identifier %}id="{{ local.identifier }}"{% endif %}>
+			<h2>{{ local.name }}</h2>
+			<h3>{{ local.address }}</h3>
 
-			{% if atv.playing %}
-				{% if atv.playing == 'Paused' %}
+			{% if local.playing %}
+				{% if local.playing == 'Paused' %}
 					<div class="status paused"></div>
 				{% else %}
 					<div class="status playing"></div>
 				{% endif %}
 					<!--<marquee scrolldelay="100">-->
-						<span class="playing">{{ atv.now_playing }}</span>
+						<span class="playing">{{ local.now_playing }}</span>
 					<!--</marquee>-->
 			{% else %}
 				<div class="status idle"></div>
@@ -24,21 +24,21 @@
 			{% endif %}
 
 			<div class="progress">
-				{% if atv.playing_percent %}
-					{% if atv.playing_percent > 100 %}
+				{% if local.playing_percent %}
+					{% if local.playing_percent > 100 %}
 						<div class="bar" style="width: 100%"></div>
-					{% elif atv.playing_percent > 0 %}
-						<div class="bar" style="width: {{ atv.playing_percent }}%"></div>
+					{% elif local.playing_percent > 0 %}
+						<div class="bar" style="width: {{ local.playing_percent }}%"></div>
 					{% endif %}
 				{% endif %}
 			</div>
 
 			<div class="times">
-				{% if atv.current_position %}
-					<span class="count-up">{{ atv.current_position }}</span>
-					<span class="count-down" id="{{ atv.identifier }}-cd">{{ atv.time_remaining }}</span>
-				{% elif atv.playing_percent %}
-					{% if atv.playing_percent > 100 %}
+				{% if local.current_position %}
+					<span class="count-up">{{ local.current_position }}</span>
+					<span class="count-down" id="{{ local.identifier }}-cd">{{ local.time_remaining }}</span>
+				{% elif local.playing_percent %}
+					{% if local.playing_percent > 100 %}
 						<span class="count-up">Live TV Session</span>
 					{% endif %}
 				{% endif %}
@@ -48,10 +48,64 @@
 		{% endfor %}
 	</div>
 </section>
+<section>
+	<h1>Remote Sessions</h1>
+
+	<div class="container">
+		{% for remote in context.remote %}
+		<div class="media" {% if remote.identifier %}id="{{ remote.identifier }}"{% endif %}>
+			<h2>{{ remote.name }}</h2>
+			<h3>{{ remote.address }}</h3>
+
+			{% if remote.playing %}
+				{% if remote.playing == 'Paused' %}
+					<div class="status paused"></div>
+				{% else %}
+					<div class="status playing"></div>
+				{% endif %}
+					<!--<marquee scrolldelay="100">-->
+						<span class="playing">{{ remote.now_playing }}</span>
+					<!--</marquee>-->
+			{% else %}
+				<div class="status idle"></div>
+				<span class="idle">Not Playing</span>
+			{% endif %}
+
+			<div class="progress">
+				{% if remote.playing_percent %}
+					{% if remote.playing_percent > 100 %}
+						<div class="bar" style="width: 100%"></div>
+					{% elif remote.playing_percent > 0 %}
+						<div class="bar" style="width: {{ remote.playing_percent }}%"></div>
+					{% endif %}
+				{% endif %}
+			</div>
+
+			<div class="times">
+				{% if remote.current_position %}
+					<span class="count-up">{{ remote.current_position }}</span>
+					<span class="count-down" id="{{ remote.identifier }}-cd">{{ remote.time_remaining }}</span>
+				{% elif remote.playing_percent %}
+					{% if remote.playing_percent > 100 %}
+						<span class="count-up">Live TV Session</span>
+					{% endif %}
+				{% endif %}
+			</div>
+
+		</div>
+		{% endfor %}
+	</div>
+</section>
+
 {% endblock %}
 {% block script %}
 <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <script type="text/javascript">
+
+	$(document).ready(function() {
+		console.log({{ console|safe }});
+	});
+
 	function startTimer(timer) {
 		var presentTime = timer;
 		var timeArray = presentTime.split(/[:]+/);
@@ -71,11 +125,11 @@
 		return sec;
 	}
 
-	{% for atv in context.atvs %}
-		{% if atv.current_position %}
+	{% for media in context.medias %}
+		{% if local.current_position %}
 			window.onload = function () {
 
-			    var timeDisplay = document.getElementById('{{ atv.identifier }}-cd').innerHTML;
+			    var timeDisplay = document.getElementById('{{ local.identifier }}-cd').innerHTML;
 			    startTimer(timeDisplay);
 			};
 		{% endif %}
