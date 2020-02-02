@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>{% if title %}{{ title }}{% else %}MDash{% endif %}</title>
+	<title>{% if title %}{{ title }}{% else %}Mdash{% endif %}</title>
 
 	<link rel="stylesheet" type="text/css" href="css/reset.css">
 	<link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
-{% block content %}
-{% endblock %}
+	{% block content %}
+	{% endblock %}
 </body>
+
+{% block script %}
+{% endblock %}
+
 </html>

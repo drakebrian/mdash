@@ -4,4 +4,4 @@ app = Quart(__name__, static_url_path='', static_folder='static', template_folde
 
 from app import routes
 
-app.run()
+app.run(host='0.0.0.0')

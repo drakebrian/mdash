@@ -15,8 +15,9 @@
 				{% else %}
 					<div class="status playing"></div>
 				{% endif %}
-
-				<marquee scrolldelay="100"><span class="playing">{{ atv.now_playing }}</span></marquee>
+					<!--<marquee scrolldelay="100">-->
+						<span class="playing">{{ atv.now_playing }}</span>
+					<!--</marquee>-->
 			{% else %}
 				<div class="status idle"></div>
 				<span class="idle">Not Playing</span>
@@ -34,8 +35,12 @@
 
 			<div class="times">
 				{% if atv.current_position %}
-					<span>{{ atv.current_position }}</span>
-					<span>{{ atv.time_remaining }}</span>
+					<span class="count-up">{{ atv.current_position }}</span>
+					<span class="count-down" id="{{ atv.identifier }}-cd">{{ atv.time_remaining }}</span>
+				{% elif atv.playing_percent %}
+					{% if atv.playing_percent > 100 %}
+						<span class="count-up">Live TV Session</span>
+					{% endif %}
 				{% endif %}
 			</div>
 
@@ -43,4 +48,39 @@
 		{% endfor %}
 	</div>
 </section>
+{% endblock %}
+{% block script %}
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+	function startTimer(timer) {
+		var presentTime = timer;
+		var timeArray = presentTime.split(/[:]+/);
+		var m = timeArray[0];
+		var s = checkSecond((timeArray[1] - 1));
+		if(s==59){m=m-1}
+		//if(m<0){alert('timer completed')}
+
+		timer.innerHTML = m + ":" + s;
+		//console.log(m)
+		setTimeout(startTimer, 1000);
+	}
+
+	function checkSecond(sec) {
+		if (sec < 10 && sec >= 0) {sec = "0" + sec}; // add zero in front of numbers < 10
+		if (sec < 0) {sec = "59"};
+		return sec;
+	}
+
+	{% for atv in context.atvs %}
+		{% if atv.current_position %}
+			window.onload = function () {
+
+			    var timeDisplay = document.getElementById('{{ atv.identifier }}-cd').innerHTML;
+			    startTimer(timeDisplay);
+			};
+		{% endif %}
+	{% endfor %}
+
+</script>
+
 {% endblock %}
