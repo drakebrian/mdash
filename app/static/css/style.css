@@ -37,6 +37,7 @@ section h1 {
   padding: 20px;
   font-size: 150%;
   position: relative;
+  overflow: hidden;
 }
 
 .media h2 {
