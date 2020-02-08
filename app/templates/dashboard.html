@@ -6,6 +6,9 @@
 	<div class="container">
 		{% for local in context.local %}
 		<div class="media" {% if local.identifier %}id="{{ local.identifier }}"{% endif %}>
+			{% if local.device_type %}
+				<img class="device-type" src="img/{{ local.device_type }}.png" />
+			{% endif %}
 			<h2>{{ local.name }}</h2>
 			<h3>{{ local.address }}</h3>
 
@@ -37,7 +40,7 @@
 					<span class="count-down" data-current="{{ local.time_remaining }}"></span>
 				{% elif local.playing_percent %}
 					{% if local.playing_percent > 100 %}
-						<span class="count-up">Live TV Session</span>
+						<span class="live-tv">Live TV Session</span>
 					{% endif %}
 				{% endif %}
 			</div>
@@ -86,7 +89,7 @@
 					<span class="count-down" data-current="{{ remote.time_remaining }}"></span>
 				{% elif remote.playing_percent %}
 					{% if remote.playing_percent > 100 %}
-						<span class="count-up">Live TV Session</span>
+						<span class="live-tv">Live TV Session</span>
 					{% endif %}
 				{% endif %}
 			</div>
@@ -109,7 +112,7 @@
 		if (minutes + seconds == 0) {
 			window.location.reload(true);
 		}
-		
+
 		return minutes + ':' + ('0'+seconds).slice(-2)
 	}
 

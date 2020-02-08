@@ -60,6 +60,7 @@ async def discover(loop, artwork=False, hosts=None):
         atv['name'] = device.name
         atv['address'] = device.address
         atv['identifier'] = device.identifier
+        atv['device_type'] = 'apple-tv'
 
         for service in device.services:
             if service.protocol.name == 'MRP':
@@ -88,9 +89,9 @@ async def discover(loop, artwork=False, hosts=None):
                             atv['playing_percent'] = 200
 
                         ## TO DO Artwork
-                        if artwork:
-                            artwork = await connect_device.metadata.artwork()
-                            print(artwork)
+                        # if artwork:
+                        #     artwork = await connect_device.metadata.artwork()
+                        #     print(artwork)
 
                 finally:
                     await connect_device.close()
