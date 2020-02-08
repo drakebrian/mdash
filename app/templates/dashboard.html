@@ -105,6 +105,11 @@
 	function parseTime(seconds) {
 		minutes = Math.floor(seconds / 60); 
 		seconds -= minutes * 60;
+
+		if (minutes + seconds == 0) {
+			window.location.reload(true);
+		}
+		
 		return minutes + ':' + ('0'+seconds).slice(-2)
 	}
 
