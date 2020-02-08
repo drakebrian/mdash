@@ -14,6 +14,21 @@ nest_asyncio.apply()
 LOOP = asyncio.get_event_loop()
 CONFIG_FILE = 'app/config.yaml'
 
+def plex_connect(plex_config):
+    addr = plex_config['addr']
+    port = plex_config['port']
+    protocol = plex_config['protocol']
+    token = plex_config['token']
+    base_url = protocol + '://' + addr + ':' + str(port)
+    plex = PlexServer(base_url, token)
+
+    return plex
+
+def plex_load_config(config=CONFIG_FILE):
+    plex_config = load_config(config=CONFIG_FILE, section='plex_server')
+
+    return plex_config
+
 def load_config(config=CONFIG_FILE, section=None):
     if os.path.exists(config):
         with open(config, 'r') as stream:
@@ -45,7 +60,6 @@ async def discover(loop, artwork=False, hosts=None):
         atv['name'] = device.name
         atv['address'] = device.address
         atv['identifier'] = device.identifier
-        # atv['services'] = device.services
 
         for service in device.services:
             if service.protocol.name == 'MRP':
@@ -63,12 +77,13 @@ async def discover(loop, artwork=False, hosts=None):
                         if now_playing.total_time:
                             atv['playing_percent'] = (now_playing.position / now_playing.total_time) * 100
 
-                            atv['current_position'] = now_playing.position
-                            atv['time_remaining'] = now_playing.total_time - now_playing.position
+                            atv['current_position'] = now_playing.position - 10
+                            atv['time_remaining'] = now_playing.total_time - now_playing.position + 10
+                            atv['total_time'] = now_playing.total_time
                         
-                            print('current: ' + str(now_playing.position))
-                            print('total: ' + str(now_playing.total_time))
-                            print(str(atv['playing_percent']))
+                            # print('current: ' + str(now_playing.position))
+                            # print('total: ' + str(now_playing.total_time))
+                            # print(str(atv['playing_percent']))
                         elif now_playing.position and not now_playing.total_time:
                             atv['playing_percent'] = 200
 
@@ -83,23 +98,9 @@ async def discover(loop, artwork=False, hosts=None):
 
     return atvs
 
-def plex_connect(plex_config):
-    addr = plex_config['addr']
-    port = plex_config['port']
-    protocol = plex_config['protocol']
-    token = plex_config['token']
-    base_url = protocol + '://' + addr + ':' + str(port)
-    plex = PlexServer(base_url, token)
-
-    return plex
-
-def plex_load_config(config=CONFIG_FILE):
-    plex_config = load_config(config=CONFIG_FILE, section='plex_server')
-
-    return plex_config
-
 @app.route('/')
 def dashboard():
+    local = remote = None
     local_plex_sessions = []
     remote_plex_sessions = []
     plex = plex_connect(plex_load_config())
@@ -133,5 +134,7 @@ def dashboard():
     local = atvs + local_plex_sessions
     remote = remote_plex_sessions
     context = {'local': local, 'remote': remote}
+
+    print(str(context))
 
     return render_template('dashboard.html', title='Mdashboard', context=context, console=json.dumps(context))

@@ -15,9 +15,7 @@
 				{% else %}
 					<div class="status playing"></div>
 				{% endif %}
-					<!--<marquee scrolldelay="100">-->
-						<span class="playing">{{ local.now_playing }}</span>
-					<!--</marquee>-->
+					<span class="playing">{{ local.now_playing }}</span>
 			{% else %}
 				<div class="status idle"></div>
 				<span class="idle">Not Playing</span>
@@ -28,15 +26,15 @@
 					{% if local.playing_percent > 100 %}
 						<div class="bar" style="width: 100%"></div>
 					{% elif local.playing_percent > 0 %}
-						<div class="bar" style="width: {{ local.playing_percent }}%"></div>
+						<div class="bar update" style="width: {{ local.playing_percent }}%"></div>
 					{% endif %}
 				{% endif %}
 			</div>
 
 			<div class="times">
 				{% if local.current_position %}
-					<span class="count-up">{{ local.current_position }}</span>
-					<span class="count-down" id="{{ local.identifier }}-cd">{{ local.time_remaining }}</span>
+					<span class="count-up" data-current="{{ local.current_position }}"></span>
+					<span class="count-down" data-current="{{ local.time_remaining }}"></span>
 				{% elif local.playing_percent %}
 					{% if local.playing_percent > 100 %}
 						<span class="count-up">Live TV Session</span>
@@ -48,10 +46,11 @@
 		{% endfor %}
 	</div>
 </section>
+
+{% if context.remote %}
 <section>
-	{% if context.remote %}
-		<h1>Remote Sessions</h1>
-	{% endif %}
+	
+	<h1>Remote Sessions</h1>
 
 	<div class="container">
 		{% for remote in context.remote %}
@@ -65,9 +64,7 @@
 				{% else %}
 					<div class="status playing"></div>
 				{% endif %}
-					<!--<marquee scrolldelay="100">-->
-						<span class="playing">{{ remote.now_playing }}</span>
-					<!--</marquee>-->
+					<span class="playing">{{ remote.now_playing }}</span>
 			{% else %}
 				<div class="status idle"></div>
 				<span class="idle">Not Playing</span>
@@ -78,15 +75,15 @@
 					{% if remote.playing_percent > 100 %}
 						<div class="bar" style="width: 100%"></div>
 					{% elif remote.playing_percent > 0 %}
-						<div class="bar" style="width: {{ remote.playing_percent }}%"></div>
+						<div class="bar update" style="width: {{ remote.playing_percent }}%"></div>
 					{% endif %}
 				{% endif %}
 			</div>
 
 			<div class="times">
 				{% if remote.current_position %}
-					<span class="count-up">{{ remote.current_position }}</span>
-					<span class="count-down" id="{{ remote.identifier }}-cd">{{ remote.time_remaining }}</span>
+					<span class="count-up" data-current="{{ remote.current_position }}"></span>
+					<span class="count-down" data-current="{{ remote.time_remaining }}"></span>
 				{% elif remote.playing_percent %}
 					{% if remote.playing_percent > 100 %}
 						<span class="count-up">Live TV Session</span>
@@ -98,44 +95,56 @@
 		{% endfor %}
 	</div>
 </section>
+{% endif %}
 
 {% endblock %}
 {% block script %}
 <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
+	function parseTime(seconds) {
+		minutes = Math.floor(seconds / 60); 
+		seconds -= minutes * 60;
+		return minutes + ':' + ('0'+seconds).slice(-2)
+	}
+
+	function count(element, direction) {
+		setInterval(function() {
+			current = parseInt(element.attr('data-current'));
+			next = current + direction;
+			element.attr('data-current', next);
+			element.text(parseTime(next));
+		}, 1000);
+	}
+
+	function updateProgress(element) {
+		setInterval(function() {
+			current_pos = parseInt(element.parent().next().children('span.count-up').attr('data-current'));
+			time_remain = parseInt(element.parent().next().children('span.count-down').attr('data-current'));
+			newWidth = (current_pos / (time_remain + current_pos)) * 100
+			element.css('width', newWidth + '%');
+		}, 1000)
+	}
+
+
 	$(document).ready(function() {
 		console.log({{ console|safe }});
+
+		$('.count-up').each(function() {
+			$(this).text(parseTime($(this).attr('data-current')));
+			count($(this), 1);
+		});
+
+		$('.count-down').each(function() {
+			$(this).text(parseTime($(this).attr('data-current')));
+			count($(this), -1);
+		});
+
+		$('.bar.update').each(function() {
+			updateProgress($(this));
+		});
+
 	});
-
-	function startTimer(timer) {
-		var presentTime = timer;
-		var timeArray = presentTime.split(/[:]+/);
-		var m = timeArray[0];
-		var s = checkSecond((timeArray[1] - 1));
-		if(s==59){m=m-1}
-		//if(m<0){alert('timer completed')}
-
-		timer.innerHTML = m + ":" + s;
-		//console.log(m)
-		setTimeout(startTimer, 1000);
-	}
-
-	function checkSecond(sec) {
-		if (sec < 10 && sec >= 0) {sec = "0" + sec}; // add zero in front of numbers < 10
-		if (sec < 0) {sec = "59"};
-		return sec;
-	}
-
-	{% for media in context.medias %}
-		{% if local.current_position %}
-			window.onload = function () {
-
-			    var timeDisplay = document.getElementById('{{ local.identifier }}-cd').innerHTML;
-			    startTimer(timeDisplay);
-			};
-		{% endif %}
-	{% endfor %}
 
 </script>
 
