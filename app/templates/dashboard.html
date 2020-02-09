@@ -7,7 +7,9 @@
 		{% for local in context.local %}
 		<div class="media" {% if local.identifier %}id="{{ local.identifier }}"{% endif %}>
 			{% if local.device_type %}
-				<img class="device-type" src="img/{{ local.device_type }}.png" />
+				<div class="device-type">
+					<img {% if local.device_type == 'plex' %}class="plex"{% endif %} src="img/{{ local.device_type }}.png" />
+				</div>
 			{% endif %}
 			<h2>{{ local.name }}</h2>
 			<h3>{{ local.address }}</h3>
@@ -117,12 +119,14 @@
 	}
 
 	function count(element, direction) {
-		setInterval(function() {
-			current = parseInt(element.attr('data-current'));
-			next = current + direction;
-			element.attr('data-current', next);
-			element.text(parseTime(next));
-		}, 1000);
+		if (!element.parent().siblings('div.status').hasClass('paused')) {
+			setInterval(function() {
+				current = parseInt(element.attr('data-current'));
+				next = current + direction;
+				element.attr('data-current', next);
+				element.text(parseTime(next));
+			}, 1000);
+		}
 	}
 
 	function updateProgress(element) {
@@ -144,7 +148,7 @@
 		});
 
 		$('.count-down').each(function() {
-			$(this).text(parseTime($(this).attr('data-current')));
+			$(this).text(parseTime($(this).attr('data-current')));	
 			count($(this), -1);
 		});
 

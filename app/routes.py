@@ -78,8 +78,8 @@ async def discover(loop, artwork=False, hosts=None):
                         if now_playing.total_time:
                             atv['playing_percent'] = (now_playing.position / now_playing.total_time) * 100
 
-                            atv['current_position'] = now_playing.position - 10
-                            atv['time_remaining'] = now_playing.total_time - now_playing.position + 10
+                            atv['current_position'] = now_playing.position
+                            atv['time_remaining'] = now_playing.total_time - now_playing.position
                             atv['total_time'] = now_playing.total_time
                         
                             # print('current: ' + str(now_playing.position))
@@ -99,12 +99,9 @@ async def discover(loop, artwork=False, hosts=None):
 
     return atvs
 
-@app.route('/')
-def dashboard():
-    local = remote = None
+def plex_streams(plex):
     local_plex_sessions = []
     remote_plex_sessions = []
-    plex = plex_connect(plex_load_config())
 
     for session in plex.sessions():
         title = session.title
@@ -115,6 +112,7 @@ def dashboard():
             session['now_playing'] = title
             session['address'] = player.address
             session['playing'] = False
+            session['device_type'] = 'plex'
 
             if player.local:
                 local_plex_sessions.append(session)
@@ -126,16 +124,26 @@ def dashboard():
             elif player.state == 'paused':
                 session['playing'] = 'Paused'
 
+    return local_plex_sessions, remote_plex_sessions
 
-
+@app.route('/')
+def dashboard():
+    local = remote = None
     hosts_preload = load_config(config=CONFIG_FILE, section='apple_tvs')
     atvs = LOOP.run_until_complete(discover(LOOP, hosts=hosts_preload))
     atvs = sorted(atvs, key = lambda i: i['name'])
 
-    local = atvs + local_plex_sessions
+    plex = plex_connect(plex_load_config())
+    local_plex_sessions, remote_plex_sessions = plex_streams(plex)
+
     remote = remote_plex_sessions
+    local = atvs + local_plex_sessions
+
+    #unique_devices = set()
+    #local = [x for x in local if x['address'] not in unique_devices and not unique_devices.add(x['address'])]
+
     context = {'local': local, 'remote': remote}
 
-    print(str(context))
+    # print(str(context))
 
     return render_template('dashboard.html', title='Mdashboard', context=context, console=json.dumps(context))
