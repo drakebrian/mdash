@@ -107,22 +107,29 @@ def plex_streams(plex):
         title = session.title
         for player in session.players:
             session = {}
-            session['name'] = player.title + ' (' + player.device + ')'
+            session['name'] = player.title
+            if player.device: session['name'] += ' (' + player.device + ')'
             session['identifier'] = player.machineIdentifier
             session['now_playing'] = title
             session['address'] = player.address
             session['playing'] = False
             session['device_type'] = 'plex'
 
-            if player.local:
-                local_plex_sessions.append(session)
-            else:
-                remote_plex_sessions.append(session)
+            # print(player.video)
 
             if player.state == 'playing':
                 session['playing'] = True
             elif player.state == 'paused':
                 session['playing'] = 'Paused'
+
+            print(player.userID)
+
+            if player.local:
+                local_plex_sessions.append(session)
+            else:
+                session['address'] = player.remotePublicAddress
+                session['address'] += ' (' + player.userID + ')'
+                remote_plex_sessions.append(session)
 
     return local_plex_sessions, remote_plex_sessions
 
@@ -139,8 +146,8 @@ def dashboard():
     remote = remote_plex_sessions
     local = atvs + local_plex_sessions
 
-    #unique_devices = set()
-    #local = [x for x in local if x['address'] not in unique_devices and not unique_devices.add(x['address'])]
+    unique_devices = set()
+    local = [x for x in local if x['address'] not in unique_devices and not unique_devices.add(x['address'])]
 
     context = {'local': local, 'remote': remote}
 
