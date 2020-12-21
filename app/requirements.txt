@@ -36,7 +36,7 @@ requests==2.22.0
 six==1.14.0
 sortedcontainers==2.1.0
 srptools==1.0.0
-tlslite-ng==0.7.5
+tlslite-ng==0.7.6
 toml==0.10.0
 tqdm==4.42.0
 typing-extensions==3.7.4.1
